@@ -1,27 +1,57 @@
 'use client'
 
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Save, Calendar, DollarSign, Calculator } from "lucide-react"
+import { Save, Calendar, DollarSign, Calculator, AlertCircle, CheckCircle2 } from "lucide-react"
 import { saveBudget } from "@/app/admin/actions"
 
 export function BudgetWizard() {
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+
+  async function handleSubmit(formData: FormData) {
+    setError(null)
+    setSuccess(false)
+    const result = await saveBudget(formData)
+    
+    if (result?.error) {
+      setError(result.error)
+    } else {
+      setSuccess(true)
+    }
+  }
+
   return (
-    <div className="space-y-8 pb-8 max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <form action={handleSubmit} className="space-y-8 pb-8 max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Annual Budget Setup</h1>
           <p className="text-slate-500 mt-1">Configure the total budget and distribute allocations for the year.</p>
         </div>
-        <Button type="submit" form="budget-form" className="bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-500/20 h-11 px-6">
+        <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-500/20 h-11 px-6">
           <Save className="h-4 w-4 mr-2" /> Save & Lock Budget
         </Button>
       </div>
 
+      {error && (
+        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg flex items-center shadow-sm">
+          <AlertCircle className="h-5 w-5 mr-3 flex-shrink-0" />
+          <p className="text-sm font-medium">{error}</p>
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg flex items-center shadow-sm">
+          <CheckCircle2 className="h-5 w-5 mr-3 flex-shrink-0" />
+          <p className="text-sm font-medium">Budget successfully saved and locked for the year!</p>
+        </div>
+      )}
+
       <div className="grid gap-6 md:grid-cols-3">
-        <form id="budget-form" action={saveBudget} className="md:col-span-2 space-y-6">
+        <div className="md:col-span-2 space-y-6">
           <Card className="border-none shadow-md">
             <CardHeader className="bg-slate-50 border-b border-slate-100 rounded-t-xl">
               <CardTitle>General Information</CardTitle>
@@ -79,7 +109,7 @@ export function BudgetWizard() {
               </div>
             </CardContent>
           </Card>
-        </form>
+        </div>
 
         {/* Summary Sidebar */}
         <div className="space-y-6">
@@ -112,6 +142,6 @@ export function BudgetWizard() {
           </Card>
         </div>
       </div>
-    </div>
+    </form>
   )
 }

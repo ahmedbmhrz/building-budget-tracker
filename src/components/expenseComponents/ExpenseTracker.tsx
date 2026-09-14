@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { UploadCloud, FileText, CheckCircle2 } from "lucide-react"
 
-export function ExpenseTracker() {
+export function ExpenseTracker({ initialExpenses = [] }: { initialExpenses?: any[] }) {
   return (
     <div className="space-y-8 pb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between">
@@ -91,47 +91,25 @@ export function ExpenseTracker() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-                  <TableCell className="font-medium text-slate-700 pl-6">Oct 24, 2026</TableCell>
-                  <TableCell>
-                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20">
-                      Elevator
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-slate-600">Monthly maintenance contract</TableCell>
-                  <TableCell className="text-center">
-                    <button className="text-indigo-600 hover:bg-indigo-50 p-2 rounded-md transition-colors inline-flex">
-                      <FileText className="h-4 w-4" />
-                    </button>
-                  </TableCell>
-                  <TableCell className="text-right font-medium pr-6">$450.00</TableCell>
-                </TableRow>
-                <TableRow className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-                  <TableCell className="font-medium text-slate-700 pl-6">Oct 22, 2026</TableCell>
-                  <TableCell>
-                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20">
-                      Electric
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-slate-600">Common areas (Sep)</TableCell>
-                  <TableCell className="text-center text-slate-300">-</TableCell>
-                  <TableCell className="text-right font-medium pr-6">$845.20</TableCell>
-                </TableRow>
-                <TableRow className="hover:bg-slate-50/50 transition-colors border-b border-slate-100">
-                  <TableCell className="font-medium text-slate-700 pl-6">Oct 18, 2026</TableCell>
-                  <TableCell>
-                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-600/20">
-                      Repairs
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-slate-600">Fix main entrance door lock</TableCell>
-                  <TableCell className="text-center">
-                     <button className="text-indigo-600 hover:bg-indigo-50 p-2 rounded-md transition-colors inline-flex">
-                      <FileText className="h-4 w-4" />
-                    </button>
-                  </TableCell>
-                  <TableCell className="text-right font-medium pr-6">$120.00</TableCell>
-                </TableRow>
+                {initialExpenses.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-6 text-slate-500">No expenses recorded yet.</TableCell>
+                  </TableRow>
+                ) : initialExpenses.map((expense) => {
+                  return (
+                    <TableRow key={expense.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                      <TableCell className="font-medium text-slate-700 pl-6">{new Date(expense.expense_date).toLocaleDateString()}</TableCell>
+                      <TableCell>
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 ring-1 ring-inset ring-slate-600/20">
+                          {expense.category}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-slate-600">{expense.description || '-'}</TableCell>
+                      <TableCell className="text-center text-slate-300">-</TableCell>
+                      <TableCell className="text-right font-medium pr-6">${expense.amount.toFixed(2)}</TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
             <div className="p-4 bg-slate-50 border-t border-slate-100 text-center">
