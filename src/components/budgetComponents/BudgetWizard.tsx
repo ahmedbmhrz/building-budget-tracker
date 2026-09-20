@@ -12,6 +12,11 @@ export function BudgetWizard() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
+  // Dynamic Summary State
+  const [targetTotal, setTargetTotal] = useState(120000)
+  const [year, setYear] = useState(2026)
+  const [allocated, setAllocated] = useState(120000)
+
   async function handleSubmit(formData: FormData) {
     setError(null)
     setSuccess(false)
@@ -24,14 +29,35 @@ export function BudgetWizard() {
     }
   }
 
+  function handleFormChange(e: React.FormEvent<HTMLFormElement>) {
+    const formData = new FormData(e.currentTarget)
+    
+    const newYear = parseInt(formData.get('year') as string) || 2026
+    const newTotal = parseFloat(formData.get('total') as string) || 0
+    
+    setYear(newYear)
+    setTargetTotal(newTotal)
+
+    let sum = 0
+    for (const [key, value] of formData.entries()) {
+      if (key.startsWith('cat_') && value) {
+        sum += parseFloat(value as string) || 0
+      }
+    }
+    setAllocated(sum)
+  }
+
+  const remaining = targetTotal - allocated
+  const isBalanced = remaining === 0
+
   return (
-    <form action={handleSubmit} className="space-y-8 pb-8 max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <form action={handleSubmit} onChange={handleFormChange} className="space-y-8 pb-8 max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Annual Budget Setup</h1>
           <p className="text-slate-500 mt-1">Configure the total budget and distribute allocations for the year.</p>
         </div>
-        <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-500/20 h-11 px-6">
+        <Button type="submit" disabled={!isBalanced} className="bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-500/20 h-11 px-6 disabled:opacity-50 disabled:cursor-not-allowed">
           <Save className="h-4 w-4 mr-2" /> Save & Lock Budget
         </Button>
       </div>
@@ -113,30 +139,44 @@ export function BudgetWizard() {
 
         {/* Summary Sidebar */}
         <div className="space-y-6">
-          <Card className="border-none shadow-md bg-indigo-600 text-white">
+          <Card className={`border-none shadow-md text-white transition-colors duration-500 ${isBalanced ? 'bg-indigo-600' : 'bg-slate-700'}`}>
             <CardHeader className="pb-2">
-              <CardTitle className="text-indigo-100 flex items-center">
+              <CardTitle className={`flex items-center ${isBalanced ? 'text-indigo-100' : 'text-slate-200'}`}>
                 <Calculator className="h-5 w-5 mr-2" />
                 Budget Summary
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold mt-2">$120k</div>
-              <p className="text-indigo-200 mt-1 text-sm">Total Budget for 2026</p>
+              <div className="text-4xl font-bold mt-2">${(targetTotal / 1000).toFixed(0)}k</div>
+              <p className={`mt-1 text-sm ${isBalanced ? 'text-indigo-200' : 'text-slate-300'}`}>Total Budget for {year}</p>
               
               <div className="mt-8 space-y-4">
-                <div className="flex justify-between items-center text-sm border-b border-indigo-500/50 pb-2">
-                  <span className="text-indigo-100">Allocated</span>
-                  <span className="font-semibold">$120,000</span>
+                <div className={`flex justify-between items-center text-sm border-b pb-2 ${isBalanced ? 'border-indigo-500/50' : 'border-slate-600'}`}>
+                  <span className={isBalanced ? 'text-indigo-100' : 'text-slate-300'}>Allocated</span>
+                  <span className="font-semibold">${allocated.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                 </div>
-                <div className="flex justify-between items-center text-sm border-b border-indigo-500/50 pb-2">
-                  <span className="text-indigo-100">Remaining</span>
-                  <span className="font-semibold text-emerald-300">$0.00</span>
+                <div className={`flex justify-between items-center text-sm border-b pb-2 ${isBalanced ? 'border-indigo-500/50' : 'border-slate-600'}`}>
+                  <span className={isBalanced ? 'text-indigo-100' : 'text-slate-300'}>Remaining</span>
+                  <span className={`font-semibold ${remaining === 0 ? 'text-emerald-300' : remaining < 0 ? 'text-rose-300' : 'text-amber-300'}`}>
+                    ${Math.abs(remaining).toLocaleString(undefined, {minimumFractionDigits: 2})}
+                    {remaining < 0 && ' (Over)'}
+                  </span>
                 </div>
               </div>
 
-              <div className="mt-8 bg-indigo-700/50 rounded-lg p-4 text-sm text-indigo-100 text-center border border-indigo-500/30">
-                Perfectly balanced! You can now save and lock this budget.
+              <div className={`mt-8 rounded-lg p-4 text-sm text-center border ${
+                isBalanced 
+                  ? 'bg-indigo-700/50 text-indigo-100 border-indigo-500/30' 
+                  : remaining < 0 
+                    ? 'bg-rose-500/20 text-rose-200 border-rose-500/30'
+                    : 'bg-amber-500/20 text-amber-200 border-amber-500/30'
+              }`}>
+                {isBalanced 
+                  ? 'Perfectly balanced! You can now save and lock this budget.'
+                  : remaining < 0
+                    ? 'You have allocated more than your total budget.'
+                    : 'You still have funds left to allocate.'
+                }
               </div>
             </CardContent>
           </Card>

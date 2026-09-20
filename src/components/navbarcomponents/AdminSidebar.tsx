@@ -2,12 +2,13 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Building, LayoutDashboard, Receipt, Users, Wallet, LogOut, Settings } from "lucide-react"
+import { Building, LayoutDashboard, Receipt, Users, Wallet, LogOut, Settings, CreditCard } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navItems = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { name: 'Apartments', href: '/admin/apartments', icon: Users },
+  { name: 'Apartments', href: '/admin/apartments', icon: Building },
+  { name: 'Owner Ledger', href: '/admin/owners', icon: Users },
   { name: 'Budget Setup', href: '/admin/budget', icon: Wallet },
   { name: 'Expenses', href: '/admin/expenses', icon: Receipt },
 ]

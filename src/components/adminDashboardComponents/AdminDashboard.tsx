@@ -7,16 +7,6 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Plus, TrendingUp, DollarSign, Activity, CreditCard, ArrowUpRight } from "lucide-react"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts"
-
-const chartData = [
-  { category: "Keeper", allocated: 30000, used: 25000 },
-  { category: "Elevator", allocated: 20000, used: 19000 },
-  { category: "Electric", allocated: 20000, used: 9000 },
-  { category: "Cleaning", allocated: 15000, used: 12000 },
-  { category: "Security", allocated: 15000, used: 15000 },
-  { category: "Repairs", allocated: 20000, used: 5000 },
-]
-
 import {
   Dialog,
   DialogContent,
@@ -28,7 +18,26 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-export function AdminDashboard() {
+type AdminDashboardProps = {
+  totalBudget?: number;
+  totalExpenses?: number;
+  totalCollected?: number;
+  chartData?: any[];
+  recentExpenses?: any[];
+}
+
+export function AdminDashboard({ 
+  totalBudget = 0, 
+  totalExpenses = 0, 
+  totalCollected = 0, 
+  chartData = [], 
+  recentExpenses = [] 
+}: AdminDashboardProps) {
+
+  const outstanding = totalBudget - totalCollected;
+  const expensePercentage = totalBudget > 0 ? ((totalExpenses / totalBudget) * 100).toFixed(1) : '0';
+  const collectionRate = totalBudget > 0 ? ((totalCollected / totalBudget) * 100).toFixed(1) : '0';
+
   return (
     <div className="space-y-8 pb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between">
@@ -92,10 +101,10 @@ export function AdminDashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-800">$120,000</div>
+            <div className="text-3xl font-bold text-slate-800">${totalBudget.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
             <div className="flex items-center mt-1 text-xs text-emerald-600 font-medium">
               <TrendingUp className="h-3 w-3 mr-1" />
-              +2.1% from last year
+              Active Budget
             </div>
           </CardContent>
         </Card>
@@ -108,10 +117,10 @@ export function AdminDashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-800">$45,231</div>
+            <div className="text-3xl font-bold text-slate-800">${totalExpenses.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
             <div className="flex items-center mt-1 text-xs text-rose-600 font-medium">
               <ArrowUpRight className="h-3 w-3 mr-1" />
-              37.6% of budget used
+              {expensePercentage}% of budget used
             </div>
           </CardContent>
         </Card>
@@ -124,9 +133,9 @@ export function AdminDashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-800">$89,400</div>
+            <div className="text-3xl font-bold text-slate-800">${totalCollected.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
             <div className="flex items-center mt-1 text-xs text-emerald-600 font-medium">
-              74.5% collection rate
+              {collectionRate}% collection rate
             </div>
           </CardContent>
         </Card>
@@ -139,9 +148,9 @@ export function AdminDashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-800">$30,600</div>
+            <div className="text-3xl font-bold text-slate-800">${outstanding.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
             <div className="flex items-center mt-1 text-xs text-amber-600 font-medium">
-              Across 12 apartments
+              Pending owner payments
             </div>
           </CardContent>
         </Card>
@@ -157,41 +166,48 @@ export function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full mt-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                  <XAxis 
-                    dataKey="category" 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#64748b', fontSize: 12 }}
-                    dy={10}
-                  />
-                  <YAxis 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#64748b', fontSize: 12 }}
-                    tickFormatter={(value) => `$${value/1000}k`}
-                  />
-                  <Tooltip 
-                    cursor={{ fill: '#f1f5f9' }}
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  />
-                  <Bar dataKey="allocated" fill="#e2e8f0" radius={[4, 4, 0, 0]} name="Allocated" />
-                  <Bar dataKey="used" fill="#6366f1" radius={[4, 4, 0, 0]} name="Used" />
-                </BarChart>
-              </ResponsiveContainer>
+              {chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis 
+                      dataKey="category" 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#64748b', fontSize: 12 }}
+                      dy={10}
+                    />
+                    <YAxis 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#64748b', fontSize: 12 }}
+                      tickFormatter={(value) => `$${value/1000}k`}
+                    />
+                    <Tooltip 
+                      cursor={{ fill: '#f1f5f9' }}
+                      contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                      formatter={(value: number) => `$${value.toLocaleString()}`}
+                    />
+                    <Bar dataKey="allocated" fill="#e2e8f0" radius={[4, 4, 0, 0]} name="Allocated" />
+                    <Bar dataKey="used" fill="#6366f1" radius={[4, 4, 0, 0]} name="Used" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
+                  <p>No active budget categories found.</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
 
         {/* Recent Expenses Table */}
-        <Card className="col-span-3 border-none shadow-md">
+        <Card className="col-span-3 border-none shadow-md flex flex-col">
           <CardHeader>
             <CardTitle className="text-lg">Recent Ledger Activity</CardTitle>
             <CardDescription>The latest logged maintenance expenses.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 flex flex-col">
             <Table>
               <TableHeader className="bg-slate-50/50">
                 <TableRow className="border-none">
@@ -201,45 +217,28 @@ export function AdminDashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-                  <TableCell>
-                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20">
-                      Elevator
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-slate-600 text-sm">Monthly contract</TableCell>
-                  <TableCell className="text-right font-medium text-slate-900">$450.00</TableCell>
-                </TableRow>
-                <TableRow className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-                  <TableCell>
-                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20">
-                      Electric
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-slate-600 text-sm">Common areas</TableCell>
-                  <TableCell className="text-right font-medium text-slate-900">$845.20</TableCell>
-                </TableRow>
-                <TableRow className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-                  <TableCell>
-                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-600/20">
-                      Repairs
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-slate-600 text-sm">Main entrance lock</TableCell>
-                  <TableCell className="text-right font-medium text-slate-900">$120.00</TableCell>
-                </TableRow>
-                <TableRow className="hover:bg-slate-50/50 transition-colors">
-                  <TableCell>
-                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
-                      Cleaning
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-slate-600 text-sm">Weekly service</TableCell>
-                  <TableCell className="text-right font-medium text-slate-900">$300.00</TableCell>
-                </TableRow>
+                {recentExpenses.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center py-8 text-slate-400">
+                      No expenses logged yet.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  recentExpenses.map((exp, idx) => (
+                    <TableRow key={idx} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                      <TableCell>
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-slate-50 text-slate-700 ring-1 ring-inset ring-slate-600/20">
+                          {exp.category}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-slate-600 text-sm truncate max-w-[100px]">{exp.description || '-'}</TableCell>
+                      <TableCell className="text-right font-medium text-slate-900">${Number(exp.amount).toFixed(2)}</TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
-            <div className="mt-4 pt-4 border-t border-slate-100">
+            <div className="mt-auto pt-4 border-t border-slate-100">
               <Link href="/admin/expenses" className="block w-full">
                 <Button variant="ghost" className="w-full text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50">
                   View All Expenses &rarr;

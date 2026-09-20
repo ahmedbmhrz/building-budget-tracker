@@ -172,3 +172,95 @@ export async function saveBudget(formData: FormData) {
   revalidatePath('/admin')
   return { success: true }
 }
+
+export async function logPayment(formData: FormData) {
+  const supabase = await createClient()
+
+  const profile_id = formData.get('profile_id') as string
+  const amountStr = formData.get('amount') as string
+  const date = formData.get('date') as string
+  const method = formData.get('method') as string
+
+  if (!profile_id || !amountStr || !date) {
+    return { error: 'Missing required payment fields.' }
+  }
+
+  const { error } = await supabase.from('payments').insert({
+    profile_id,
+    amount: new Decimal(amountStr).toNumber(),
+    payment_date: date,
+    payment_method: method
+  })
+
+  if (error) {
+    console.error('Error logging payment:', error)
+    return { error: error.message }
+  }
+
+  revalidatePath('/admin/owners')
+  revalidatePath('/admin')
+  return { success: true }
+}
+
+import { createClient as createRawClient } from '@supabase/supabase-js'
+
+export async function createAndAssignOwner(formData: FormData) {
+  const adminClient = await createClient()
+  
+  const apartment_id = formData.get('apartment_id') as string
+  const full_name = formData.get('full_name') as string
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+  const percentageStr = formData.get('percentage') as string
+  const phone = formData.get('phone') as string || null
+
+  if (!apartment_id || !full_name || !email || !password || !percentageStr) {
+    return { error: 'Missing required fields.' }
+  }
+
+  const percentage = parseFloat(percentageStr)
+  if (percentage <= 0 || percentage > 100) return { error: 'Percentage must be between 1 and 100.' }
+
+  // We use a raw client for signup so it doesn't overwrite the Admin's login cookies!
+  const rawClient = createRawClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
+  const { data: authData, error: authError } = await rawClient.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        full_name: full_name,
+      }
+    }
+  })
+
+  if (authError) {
+    return { error: `Auth Error: ${authError.message}` }
+  }
+
+  const newUserId = authData.user?.id
+  if (!newUserId) return { error: 'Failed to retrieve new user ID.' }
+
+  // Update profile phone if provided (Auth trigger creates the profile)
+  if (phone) {
+    await adminClient.from('profiles').update({ phone }).eq('id', newUserId)
+  }
+
+  // Assign to apartment
+  const { error: assignError } = await adminClient.from('apartment_owners').insert({
+    apartment_id,
+    profile_id: newUserId,
+    ownership_percentage: percentage
+  })
+
+  if (assignError) {
+    return { error: `Assignment Error: ${assignError.message}` }
+  }
+
+  revalidatePath('/admin/apartments')
+  revalidatePath('/admin/owners')
+  return { success: true }
+}

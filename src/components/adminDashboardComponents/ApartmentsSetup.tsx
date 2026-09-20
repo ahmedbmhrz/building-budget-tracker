@@ -110,32 +110,46 @@ export function ApartmentsSetup({ initialApartments = [] }: { initialApartments?
                         <Dialog>
                           <DialogTrigger asChild>
                             <button className="text-indigo-600 hover:text-indigo-800 text-sm font-medium transition-colors inline-flex items-center">
-                              <Edit2 className="h-3 w-3 mr-1" /> Edit
+                              <UserPlus className="h-4 w-4 mr-1" /> Add Owner
                             </button>
                           </DialogTrigger>
-                          <DialogContent className="sm:max-w-[425px] border-none shadow-xl rounded-xl">
+                          <DialogContent className="sm:max-w-[425px] border-none shadow-xl rounded-xl max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
-                              <DialogTitle>Edit Unit {apt.unit_number}</DialogTitle>
+                              <DialogTitle>Assign Owner to Unit {apt.unit_number}</DialogTitle>
                               <DialogDescription>
-                                Update the unit details and ownership parameters.
+                                Create a new account for the owner and assign them to this unit.
                               </DialogDescription>
                             </DialogHeader>
-                            <div className="grid gap-5 py-4">
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                  <Label className="text-slate-600 font-semibold">Unit Number</Label>
-                                  <div className="relative">
-                                    <Home className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                                    <Input defaultValue={apt.unit_number} className="pl-9 rounded-lg focus:ring-indigo-500/20 focus:border-indigo-500" />
-                                  </div>
-                                </div>
-                                <div className="space-y-2">
-                                  <Label className="text-slate-600 font-semibold">SqFt</Label>
-                                  <Input type="number" defaultValue={apt.sqft} className="rounded-lg focus:ring-indigo-500/20 focus:border-indigo-500" />
-                                </div>
+                            <form action={async (formData) => {
+                              const { createAndAssignOwner } = await import('@/app/admin/actions')
+                              formData.append('apartment_id', apt.id)
+                              const result = await createAndAssignOwner(formData)
+                              if (result?.error) alert(result.error) // Simple alert for now
+                              else alert("Owner successfully created and assigned!")
+                            }} className="grid gap-4 py-4">
+                              <div className="space-y-2">
+                                <Label className="text-slate-600 font-semibold">Full Name</Label>
+                                <Input name="full_name" required placeholder="John Doe" className="rounded-lg focus:ring-indigo-500/20 focus:border-indigo-500" />
                               </div>
-                              <Button className="w-full bg-indigo-600 hover:bg-indigo-700 shadow-md mt-2 rounded-lg h-11">Save Changes</Button>
-                            </div>
+                              <div className="space-y-2">
+                                <Label className="text-slate-600 font-semibold">Email</Label>
+                                <Input name="email" type="email" required placeholder="john@example.com" className="rounded-lg focus:ring-indigo-500/20 focus:border-indigo-500" />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-slate-600 font-semibold">Temporary Password</Label>
+                                <Input name="password" required type="text" placeholder="e.g., TempPass123!" className="rounded-lg focus:ring-indigo-500/20 focus:border-indigo-500" />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-slate-600 font-semibold">Phone (Optional)</Label>
+                                <Input name="phone" type="tel" placeholder="+1 234 567 8900" className="rounded-lg focus:ring-indigo-500/20 focus:border-indigo-500" />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-slate-600 font-semibold">Ownership Share (%)</Label>
+                                <Input name="percentage" type="number" required defaultValue="100" max="100" min="1" className="rounded-lg focus:ring-indigo-500/20 focus:border-indigo-500" />
+                                <p className="text-xs text-slate-500">Set to 100% unless co-owning.</p>
+                              </div>
+                              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 shadow-md mt-2 rounded-lg h-11">Create & Assign Owner</Button>
+                            </form>
                           </DialogContent>
                         </Dialog>
                       </TableCell>
