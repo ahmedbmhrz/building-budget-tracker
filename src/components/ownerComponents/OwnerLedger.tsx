@@ -5,12 +5,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Plus, CreditCard, Receipt, AlertCircle, Calendar } from "lucide-react"
+import { Plus, CreditCard, Receipt, AlertCircle, Calendar, Download } from "lucide-react"
 import { OwnerBalance } from "@/lib/calculations"
 import { logPayment } from "@/app/admin/actions"
 import { useState } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { useRouter } from "next/navigation"
+import * as XLSX from 'xlsx'
+import { PDFDownloadButton } from "./PDFDownloadButton"
 
 export function OwnerLedger({ 
   balances = [], 
@@ -25,6 +27,24 @@ export function OwnerLedger({
 }) {
   const [selectedOwner, setSelectedOwner] = useState<string>('')
   const router = useRouter()
+
+  const handleExportExcel = () => {
+    if (!balances || balances.length === 0) return
+
+    const exportData = balances.map(owner => ({
+      'Owner Name': owner.full_name,
+      'Phone': owner.phone || 'N/A',
+      'Units Owned': owner.units.map(u => `Unit ${u.unit_number} (${u.percentage}%)`).join(', '),
+      'Total Share Due ($)': owner.total_owed,
+      'Total Paid ($)': owner.total_paid,
+      'Outstanding Balance ($)': owner.outstanding_balance
+    }))
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData)
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, `Ledger ${currentYear}`)
+    XLSX.writeFile(workbook, `Owner_Ledger_${currentYear}.xlsx`)
+  }
 
   return (
     <div className="space-y-8 pb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -53,6 +73,16 @@ export function OwnerLedger({
               ))}
             </select>
           </div>
+
+          <Button 
+            variant="outline" 
+            className="shadow-sm border-slate-200" 
+            disabled={balances.length === 0}
+            onClick={handleExportExcel}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
+          </Button>
 
           <Dialog>
             <DialogTrigger asChild>
@@ -134,12 +164,13 @@ export function OwnerLedger({
                   <TableHead className="text-right font-semibold text-slate-600">Total Share Due</TableHead>
                   <TableHead className="text-right font-semibold text-slate-600">Total Paid (in {currentYear})</TableHead>
                   <TableHead className="text-right font-semibold text-slate-600 pr-6">Outstanding</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {balances.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-12 text-slate-400">
+                    <TableCell colSpan={6} className="text-center py-12 text-slate-400">
                       No owners found or no active budget.
                     </TableCell>
                   </TableRow>
@@ -173,6 +204,9 @@ export function OwnerLedger({
                         }`}>
                           ${owner.outstanding_balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </span>
+                      </TableCell>
+                      <TableCell className="pr-6">
+                        <PDFDownloadButton owner={owner} year={currentYear} />
                       </TableCell>
                     </TableRow>
                   ))
