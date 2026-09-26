@@ -2,17 +2,23 @@ import { AdminDashboard } from "@/components/adminDashboardComponents/AdminDashb
 import { createClient } from "@/lib/supabase/server"
 import { calculateAllOwnerBalances } from "@/lib/calculations"
 
-export default async function AdminPage() {
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ year?: string }> }) {
+  const params = await searchParams
+  const targetYear = params.year ? parseInt(params.year) : undefined
   const supabase = await createClient()
 
-  // 1. Get active budget
-  const { data: budgets } = await supabase
-    .from('budgets')
-    .select('id, total_amount, year')
-    .eq('status', 'active')
-    .order('year', { ascending: false })
-    .limit(1)
+  const { data: allBudgets } = await supabase.from('budgets').select('year').order('year', { ascending: false })
+  const availableYears = allBudgets?.map(b => b.year) || []
 
+  // 1. Get requested budget or active budget
+  let budgetQuery = supabase.from('budgets').select('id, total_amount, year')
+  if (targetYear) {
+    budgetQuery = budgetQuery.eq('year', targetYear)
+  } else {
+    budgetQuery = budgetQuery.eq('status', 'active').order('year', { ascending: false }).limit(1)
+  }
+
+  const { data: budgets } = await budgetQuery
   const budget = budgets?.[0]
 
   let totalBudget = 0
@@ -58,7 +64,7 @@ export default async function AdminPage() {
   }
 
   // Calculate global owner balances
-  const balancesData = await calculateAllOwnerBalances()
+  const balancesData = await calculateAllOwnerBalances(budget?.year)
   if (balancesData?.balances) {
     totalCollected = balancesData.balances.reduce((sum, b) => sum + b.total_paid, 0)
   }
@@ -70,6 +76,8 @@ export default async function AdminPage() {
       totalCollected={totalCollected}
       chartData={chartData}
       recentExpenses={recentExpenses}
+      currentYear={budget?.year || new Date().getFullYear()}
+      availableYears={availableYears}
     />
   )
 }

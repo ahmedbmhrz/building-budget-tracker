@@ -12,6 +12,7 @@ export default async function ExpensesPage() {
       amount,
       expense_date,
       description,
+      receipt_url,
       profiles (
         full_name
       )

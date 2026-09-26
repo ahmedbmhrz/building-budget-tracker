@@ -57,12 +57,27 @@ export function ExpenseTracker({ initialExpenses = [] }: { initialExpenses?: any
 
               <div className="space-y-2 pt-2">
                 <Label className="text-slate-600 font-semibold">Receipt (Optional)</Label>
-                <div className="border-2 border-dashed border-indigo-200 rounded-xl p-6 flex flex-col items-center justify-center text-slate-500 hover:bg-indigo-50/50 hover:border-indigo-400 transition-all cursor-pointer group">
-                  <div className="h-10 w-10 bg-indigo-100 text-indigo-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                    <UploadCloud className="h-5 w-5" />
+                <div className="relative border-2 border-dashed border-indigo-200 rounded-xl p-6 flex flex-col items-center justify-center text-slate-500 hover:bg-indigo-50/50 hover:border-indigo-400 transition-all cursor-pointer group overflow-hidden">
+                  <input 
+                    type="file" 
+                    name="receipt" 
+                    accept=".pdf,image/*" 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        const label = e.target.nextElementSibling?.querySelector('.file-label')
+                        if (label) label.textContent = file.name
+                      }
+                    }}
+                  />
+                  <div className="flex flex-col items-center pointer-events-none z-0">
+                    <div className="h-10 w-10 bg-indigo-100 text-indigo-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                      <UploadCloud className="h-5 w-5" />
+                    </div>
+                    <span className="file-label text-sm font-medium text-slate-700">Click to upload</span>
+                    <span className="text-xs text-slate-400 mt-1">PDF, JPG, or PNG (max 5MB)</span>
                   </div>
-                  <span className="text-sm font-medium text-slate-700">Click to upload</span>
-                  <span className="text-xs text-slate-400 mt-1">PDF, JPG, or PNG (max 5MB)</span>
                 </div>
               </div>
 
@@ -105,7 +120,34 @@ export function ExpenseTracker({ initialExpenses = [] }: { initialExpenses?: any
                         </span>
                       </TableCell>
                       <TableCell className="text-slate-600">{expense.description || '-'}</TableCell>
-                      <TableCell className="text-center text-slate-300">-</TableCell>
+                      <TableCell className="text-center">
+                        {expense.receipt_url ? (
+                          <a href={expense.receipt_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors" title="View Receipt">
+                            <FileText className="h-4 w-4" />
+                          </a>
+                        ) : (
+                          <form action={async (formData) => {
+                            const { uploadMissingReceipt } = await import('@/app/admin/actions')
+                            await uploadMissingReceipt(formData)
+                          }} className="inline-block relative">
+                            <input type="hidden" name="expense_id" value={expense.id} />
+                            <label className="cursor-pointer inline-flex items-center justify-center h-8 w-8 rounded-full bg-slate-100 text-slate-400 hover:bg-indigo-50 hover:text-indigo-600 transition-colors group" title="Upload Receipt">
+                              <UploadCloud className="h-4 w-4" />
+                              <input 
+                                type="file" 
+                                name="receipt" 
+                                accept=".pdf,image/*" 
+                                className="hidden" 
+                                onChange={(e) => {
+                                  if (e.target.files && e.target.files.length > 0) {
+                                    e.target.form?.requestSubmit()
+                                  }
+                                }} 
+                              />
+                            </label>
+                          </form>
+                        )}
+                      </TableCell>
                       <TableCell className="text-right font-medium pr-6">${expense.amount.toFixed(2)}</TableCell>
                     </TableRow>
                   )

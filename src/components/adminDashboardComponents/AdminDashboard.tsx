@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useRouter } from "next/navigation"
 
 type AdminDashboardProps = {
   totalBudget?: number;
@@ -24,6 +25,8 @@ type AdminDashboardProps = {
   totalCollected?: number;
   chartData?: any[];
   recentExpenses?: any[];
+  currentYear?: number;
+  availableYears?: number[];
 }
 
 export function AdminDashboard({ 
@@ -31,35 +34,59 @@ export function AdminDashboard({
   totalExpenses = 0, 
   totalCollected = 0, 
   chartData = [], 
-  recentExpenses = [] 
+  recentExpenses = [],
+  currentYear = new Date().getFullYear(),
+  availableYears = []
 }: AdminDashboardProps) {
 
   const outstanding = totalBudget - totalCollected;
   const expensePercentage = totalBudget > 0 ? ((totalExpenses / totalBudget) * 100).toFixed(1) : '0';
   const collectionRate = totalBudget > 0 ? ((totalCollected / totalBudget) * 100).toFixed(1) : '0';
+  const router = useRouter();
 
   return (
     <div className="space-y-8 pb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard Overview</h1>
-          <p className="text-slate-500 mt-1">Monitor building finances and owner balances for 2026.</p>
+          <p className="text-slate-500 mt-1">Monitor building finances and owner balances for {currentYear}.</p>
         </div>
         
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-500/20">
-              <Plus className="h-4 w-4 mr-2" />
-              Log Expense
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] border-none shadow-xl rounded-xl">
-            <DialogHeader>
-              <DialogTitle className="text-xl">Log New Expense</DialogTitle>
-              <DialogDescription>
-                Record a maintenance expense. This will update the budget utilization immediately.
-              </DialogDescription>
-            </DialogHeader>
+        <div className="flex items-center space-x-4">
+          {availableYears.length > 0 && (
+            <div className="relative">
+              <select 
+                value={currentYear}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    router.push(`/admin?year=${e.target.value}`)
+                  } else {
+                    router.push(`/admin`)
+                  }
+                }}
+                className="h-10 pl-4 pr-8 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none shadow-sm cursor-pointer hover:bg-slate-50 transition-colors"
+              >
+                {availableYears.map(year => (
+                  <option key={year} value={year}>{year} Budget</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-500/20">
+                <Plus className="h-4 w-4 mr-2" />
+                Log Expense
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px] border-none shadow-xl rounded-xl">
+              <DialogHeader>
+                <DialogTitle className="text-xl">Log New Expense</DialogTitle>
+                <DialogDescription>
+                  Record a maintenance expense. This will update the budget utilization immediately.
+                </DialogDescription>
+              </DialogHeader>
             <form action={logExpense} className="grid gap-5 py-4">
               <div className="space-y-2">
                 <Label htmlFor="category" className="text-slate-600 font-semibold">Category</Label>
@@ -89,6 +116,7 @@ export function AdminDashboard({
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* KPI Cards */}

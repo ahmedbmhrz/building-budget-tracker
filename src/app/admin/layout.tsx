@@ -1,7 +1,8 @@
 import { ReactNode } from "react"
 import { AdminSidebar } from "@/components/navbarcomponents/AdminSidebar"
 import { NotificationsDropdown } from "@/components/navbarcomponents/NotificationsDropdown"
-import { Bell, Search } from "lucide-react"
+import { GlobalSearch } from "@/components/navbarcomponents/GlobalSearch"
+import { Bell } from "lucide-react"
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
@@ -12,14 +13,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
         <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-10">
-          <div className="flex items-center bg-slate-100 px-4 py-2 rounded-full w-64 border border-slate-200/60 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all">
-            <Search className="h-4 w-4 text-slate-400 mr-2" />
-            <input 
-              type="text" 
-              placeholder="Search..." 
-              className="bg-transparent border-none outline-none text-sm w-full text-slate-700 placeholder:text-slate-400"
-            />
-          </div>
+          <GlobalSearch />
 
           <div className="flex items-center space-x-6">
              <NotificationsDropdown />

@@ -63,17 +63,36 @@ export async function logExpense(formData: FormData) {
   const amount = formData.get('amount') as string
   const date = formData.get('date') as string
   const desc = formData.get('desc') as string
+  const receiptFile = formData.get('receipt') as File | null
   
-  console.log("DEBUG -> Expense payload:", { category, amount, date, desc })
-
   if (!category || !amount || !date) {
-    console.log("DEBUG -> Missing required fields!")
     return { error: 'Missing required fields' }
   }
 
   // Get the logged in user to tag the expense
   const { data: { user } } = await supabase.auth.getUser()
-  console.log("DEBUG -> Authenticated user for expense:", user?.id)
+
+  let receiptUrl = null
+
+  if (receiptFile && receiptFile.size > 0) {
+    // Generate a unique filename
+    const fileExt = receiptFile.name.split('.').pop()
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+    
+    // Attempt to upload to the 'receipts' bucket
+    const { error: uploadError } = await supabase.storage
+      .from('receipts')
+      .upload(fileName, receiptFile)
+
+    if (uploadError) {
+      console.error('DEBUG -> Storage Upload Error (ensure "receipts" bucket exists and is public):', uploadError)
+      // We can continue saving the expense even if the upload fails (e.g., if bucket is missing during dev)
+    } else {
+      // Get the public URL
+      const { data: publicUrlData } = supabase.storage.from('receipts').getPublicUrl(fileName)
+      receiptUrl = publicUrlData.publicUrl
+    }
+  }
 
   const { error } = await supabase.from('expenses').insert({
     budget_id: budget.id,
@@ -81,6 +100,7 @@ export async function logExpense(formData: FormData) {
     amount: new Decimal(amount).toNumber(),
     expense_date: date,
     description: desc,
+    receipt_url: receiptUrl,
     logged_by: user?.id || null
   })
 
@@ -262,5 +282,64 @@ export async function createAndAssignOwner(formData: FormData) {
 
   revalidatePath('/admin/apartments')
   revalidatePath('/admin/owners')
+  return { success: true }
+}
+
+export async function globalSearch(query: string) {
+  if (!query || query.length < 1) return { owners: [], apartments: [], expenses: [] }
+  const supabase = await createClient()
+
+  const [
+    { data: owners },
+    { data: apartments },
+    { data: expenses }
+  ] = await Promise.all([
+    supabase.from('profiles').select('id, full_name').eq('role', 'owner').ilike('full_name', `%${query}%`).limit(3),
+    supabase.from('apartments').select('id, unit_number').ilike('unit_number', `%${query}%`).limit(3),
+    supabase.from('expenses').select('id, category, description').or(`description.ilike.%${query}%,category.ilike.%${query}%`).limit(3)
+  ])
+
+  return { 
+    owners: owners || [], 
+    apartments: apartments || [], 
+    expenses: expenses || [] 
+  }
+}
+
+export async function uploadMissingReceipt(formData: FormData) {
+  const supabase = await createClient()
+  
+  const expenseId = formData.get('expense_id') as string
+  const receiptFile = formData.get('receipt') as File | null
+
+  if (!expenseId || !receiptFile || receiptFile.size === 0) {
+    return { error: 'Missing expense ID or file' }
+  }
+
+  const fileExt = receiptFile.name.split('.').pop()
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+  
+  const { error: uploadError } = await supabase.storage
+    .from('receipts')
+    .upload(fileName, receiptFile)
+
+  if (uploadError) {
+    console.error('DEBUG -> Storage Upload Error:', uploadError)
+    return { error: 'Failed to upload file to storage.' }
+  }
+
+  const { data: publicUrlData } = supabase.storage.from('receipts').getPublicUrl(fileName)
+  const receiptUrl = publicUrlData.publicUrl
+
+  const { error: updateError } = await supabase
+    .from('expenses')
+    .update({ receipt_url: receiptUrl })
+    .eq('id', expenseId)
+
+  if (updateError) {
+    return { error: updateError.message }
+  }
+
+  revalidatePath('/admin/expenses')
   return { success: true }
 }
