@@ -11,6 +11,7 @@ import {
 export function NotificationsDropdown() {
   return (
     <DropdownMenu>
+      {/* @ts-ignore */}
       <DropdownMenuTrigger asChild>
         <button className="relative p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100 outline-none">
           <Bell className="h-5 w-5" />

@@ -85,6 +85,7 @@ export function OwnerLedger({
           </Button>
 
           <Dialog>
+            {/* @ts-ignore */}
             <DialogTrigger asChild>
               <Button disabled={!!error} className="bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-500/20 disabled:opacity-50">
                 <Plus className="h-4 w-4 mr-2" />
@@ -101,7 +102,7 @@ export function OwnerLedger({
                   Log a maintenance fee payment received from an owner for the {currentYear} budget cycle.
                 </DialogDescription>
               </DialogHeader>
-              <form action={logPayment} className="grid gap-5 py-4">
+              <form action={logPayment as any} className="grid gap-5 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="profile_id" className="text-slate-600 font-semibold">Owner</Label>
                   <select 

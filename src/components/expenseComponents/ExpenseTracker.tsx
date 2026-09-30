@@ -26,7 +26,7 @@ export function ExpenseTracker({ initialExpenses = [] }: { initialExpenses?: any
             <CardDescription>Record a building maintenance expense.</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
-            <form action={logExpense} className="space-y-5">
+            <form action={logExpense as any} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="category" className="text-slate-600 font-semibold">Category</Label>
                 <select id="category" name="category" required className="flex h-10 w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">

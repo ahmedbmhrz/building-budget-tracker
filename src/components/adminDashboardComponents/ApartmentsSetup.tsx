@@ -35,7 +35,7 @@ export function ApartmentsSetup({ initialApartments = [] }: { initialApartments?
             <CardDescription>Add a new apartment to the building.</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
-            <form action={addApartment} className="space-y-5">
+            <form action={addApartment as any} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="unit" className="text-slate-600 font-semibold">Unit Number</Label>
                 <div className="relative">
@@ -108,6 +108,7 @@ export function ApartmentsSetup({ initialApartments = [] }: { initialApartments?
                       </TableCell>
                       <TableCell className="text-right pr-6 align-top pt-4">
                         <Dialog>
+                          {/* @ts-ignore */}
                           <DialogTrigger asChild>
                             <button className="text-indigo-600 hover:text-indigo-800 text-sm font-medium transition-colors inline-flex items-center">
                               <UserPlus className="h-4 w-4 mr-1" /> Add Owner
