@@ -4,8 +4,6 @@ import { NotificationsDropdown } from "@/components/navbarcomponents/Notificatio
 import { GlobalSearch } from "@/components/navbarcomponents/GlobalSearch"
 import { Bell } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import { logout } from "@/app/login/actions"
-import { LogoutButton } from "@/components/navbarcomponents/LogoutButton"
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient()
@@ -43,10 +41,6 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                   <div className="text-sm font-semibold text-slate-700">{fullName}</div>
                   <div className="flex items-center justify-end space-x-2">
                     <span className="text-xs text-slate-500 font-medium">{role}</span>
-                    <span className="text-xs text-slate-300">•</span>
-                    <form action={logout}>
-                      <LogoutButton />
-                    </form>
                   </div>
                 </div>
                 <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center font-bold shadow-sm ring-2 ring-white">

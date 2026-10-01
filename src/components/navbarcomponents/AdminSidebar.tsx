@@ -4,6 +4,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Building, LayoutDashboard, Receipt, Users, Wallet, LogOut, Settings, CreditCard } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { logout } from "@/app/login/actions"
+import { SubmitButton } from "@/components/SubmitButton"
 
 const navItems = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -65,10 +67,12 @@ export function AdminSidebar() {
           <Settings className="h-5 w-5 mr-3 text-slate-500" />
           Settings
         </Link>
-        <button className="flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-colors mt-1">
-          <LogOut className="h-5 w-5 mr-3 text-slate-500" />
-          Log out
-        </button>
+        <form action={logout}>
+          <SubmitButton pendingText="Logging out..." className="flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-colors mt-1 bg-transparent shadow-none justify-start">
+            <LogOut className="h-5 w-5 mr-3 text-slate-500" />
+            Log out
+          </SubmitButton>
+        </form>
       </div>
     </aside>
   )
