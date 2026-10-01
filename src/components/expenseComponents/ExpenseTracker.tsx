@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { logExpense } from "@/app/admin/actions"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/SubmitButton"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { UploadCloud, FileText, CheckCircle2 } from "lucide-react"
@@ -81,9 +82,9 @@ export function ExpenseTracker({ initialExpenses = [] }: { initialExpenses?: any
                 </div>
               </div>
 
-              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-500/20 rounded-lg mt-4 h-11">
+              <SubmitButton pendingText="Submitting..." className="w-full bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-500/20 rounded-lg mt-4 h-11">
                 Submit Expense
-              </Button>
+              </SubmitButton>
             </form>
           </CardContent>
         </Card>

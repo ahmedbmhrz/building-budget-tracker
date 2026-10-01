@@ -4,6 +4,7 @@ import { addApartment } from "@/app/admin/actions"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/SubmitButton"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -47,9 +48,9 @@ export function ApartmentsSetup({ initialApartments = [] }: { initialApartments?
                 <Label htmlFor="sqft" className="text-slate-600 font-semibold">Square Footage (SqFt)</Label>
                 <Input id="sqft" name="sqft" type="number" required placeholder="1200" className="rounded-lg focus:ring-indigo-500/20 focus:border-indigo-500" />
               </div>
-              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-500/20 rounded-lg mt-4 h-11">
+              <SubmitButton pendingText="Registering..." className="w-full bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-500/20 rounded-lg mt-4 h-11">
                 <Plus className="h-4 w-4 mr-2" /> Register Apartment
-              </Button>
+              </SubmitButton>
             </form>
           </CardContent>
         </Card>
@@ -149,7 +150,9 @@ export function ApartmentsSetup({ initialApartments = [] }: { initialApartments?
                                 <Input name="percentage" type="number" required defaultValue="100" max="100" min="1" className="rounded-lg focus:ring-indigo-500/20 focus:border-indigo-500" />
                                 <p className="text-xs text-slate-500">Set to 100% unless co-owning.</p>
                               </div>
-                              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 shadow-md mt-2 rounded-lg h-11">Create & Assign Owner</Button>
+                              <SubmitButton pendingText="Creating..." className="w-full bg-indigo-600 hover:bg-indigo-700 shadow-md mt-2 rounded-lg h-11">
+                                Create & Assign Owner
+                              </SubmitButton>
                             </form>
                           </DialogContent>
                         </Dialog>

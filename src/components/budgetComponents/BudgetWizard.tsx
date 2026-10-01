@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/SubmitButton"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Save, Calendar, DollarSign, Calculator, AlertCircle, CheckCircle2 } from "lucide-react"
@@ -57,9 +58,9 @@ export function BudgetWizard() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Annual Budget Setup</h1>
           <p className="text-slate-500 mt-1">Configure the total budget and distribute allocations for the year.</p>
         </div>
-        <Button type="submit" disabled={!isBalanced} className="bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-500/20 h-11 px-6 disabled:opacity-50 disabled:cursor-not-allowed">
+        <SubmitButton pendingText="Saving..." disabled={!isBalanced} className="bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-500/20 h-11 px-6 disabled:opacity-50 disabled:cursor-not-allowed">
           <Save className="h-4 w-4 mr-2" /> Save & Lock Budget
-        </Button>
+        </SubmitButton>
       </div>
 
       {error && (

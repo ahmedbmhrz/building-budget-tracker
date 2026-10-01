@@ -4,6 +4,7 @@ import { logExpense } from "@/app/admin/actions"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/SubmitButton"
 import Link from "next/link"
 import { Plus, TrendingUp, DollarSign, Activity, CreditCard, ArrowUpRight } from "lucide-react"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts"
@@ -113,7 +114,9 @@ export function AdminDashboard({
                 <Label htmlFor="desc" className="text-slate-600 font-semibold">Description</Label>
                 <Input id="desc" name="desc" placeholder="Brief details..." className="rounded-lg focus:ring-indigo-500/20 focus:border-indigo-500" />
               </div>
-              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 shadow-md mt-2 rounded-lg h-11">Submit Expense</Button>
+              <SubmitButton pendingText="Logging..." className="w-full bg-indigo-600 hover:bg-indigo-700 shadow-md mt-2 rounded-lg h-11">
+                Submit Expense
+              </SubmitButton>
             </form>
           </DialogContent>
         </Dialog>

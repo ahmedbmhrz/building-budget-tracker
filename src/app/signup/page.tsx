@@ -1,5 +1,5 @@
 import { signup } from '@/app/login/actions'
-import { Button } from '@/components/ui/button'
+import { SubmitButton } from '@/components/SubmitButton'
 import Link from 'next/link'
 
 export default async function SignupPage({
@@ -56,9 +56,9 @@ export default async function SignupPage({
           {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
           <div className="pt-2">
-            <Button formAction={signup} type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
+            <SubmitButton formAction={signup} pendingText="Signing up..." className="w-full bg-indigo-600 hover:bg-indigo-700">
               Sign up
-            </Button>
+            </SubmitButton>
           </div>
         </form>
 

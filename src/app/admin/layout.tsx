@@ -5,6 +5,7 @@ import { GlobalSearch } from "@/components/navbarcomponents/GlobalSearch"
 import { Bell } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { logout } from "@/app/login/actions"
+import { LogoutButton } from "@/components/navbarcomponents/LogoutButton"
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient()
@@ -44,9 +45,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                     <span className="text-xs text-slate-500 font-medium">{role}</span>
                     <span className="text-xs text-slate-300">•</span>
                     <form action={logout}>
-                      <button type="submit" className="text-xs text-red-500 hover:text-red-700 font-medium hover:underline transition-colors">
-                        Log out
-                      </button>
+                      <LogoutButton />
                     </form>
                   </div>
                 </div>

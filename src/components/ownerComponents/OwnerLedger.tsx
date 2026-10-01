@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/SubmitButton"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Plus, CreditCard, Receipt, AlertCircle, Calendar, Download } from "lucide-react"
@@ -138,7 +139,9 @@ export function OwnerLedger({
                     <option value="Check">Check</option>
                   </select>
                 </div>
-                <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-md mt-2 rounded-lg h-11">Save Payment</Button>
+                <SubmitButton pendingText="Saving..." className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-md mt-2 rounded-lg h-11">
+                  Save Payment
+                </SubmitButton>
               </form>
             </DialogContent>
           </Dialog>
